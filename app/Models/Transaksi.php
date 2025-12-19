@@ -101,7 +101,7 @@ class Transaksi extends Model {
                 p.id_pelanggan as id_transaksi,
                 p.id_pelanggan,
                 p.nama as nama_pelanggan,
-                DATE_FORMAT(t.tanggal_masuk, '%Y-%m-01') as tanggal_masuk,
+                MAX(t.tanggal_masuk) as tanggal_masuk,
                 SUM(
                     CASE 
                         WHEN l.nama_layanan = 'Cuci Setrika Reguler' THEN l.berat * 10000
@@ -115,7 +115,7 @@ class Transaksi extends Model {
                 ) as total_harga,
                 CASE 
                     WHEN MIN(CASE WHEN LOWER(l.status) LIKE '%lunas%' THEN 1 ELSE 0 END) = 1 THEN 'Lunas'
-                    ELSE 'Belum Sepenuhnya Lunas'
+                    ELSE 'Belum Lunas'
                 END as status
             FROM layanan l
             JOIN detail_transaksi dt ON l.id_layanan = dt.id_layanan
@@ -135,7 +135,7 @@ class Transaksi extends Model {
                 p.id_pelanggan as id_transaksi,
                 p.id_pelanggan,
                 p.nama as nama_pelanggan,
-                DATE_FORMAT(t.tanggal_masuk, '%Y-01-01') as tanggal_masuk,
+                MAX(t.tanggal_masuk) as tanggal_masuk,
                 SUM(
                     CASE 
                         WHEN l.nama_layanan = 'Cuci Setrika Reguler' THEN l.berat * 10000
@@ -149,7 +149,7 @@ class Transaksi extends Model {
                 ) as total_harga,
                 CASE 
                     WHEN MIN(CASE WHEN LOWER(l.status) LIKE '%lunas%' THEN 1 ELSE 0 END) = 1 THEN 'Lunas'
-                    ELSE 'Belum Sepenuhnya Lunas'
+                    ELSE 'Belum Lunas'
                 END as status
             FROM layanan l
             JOIN detail_transaksi dt ON l.id_layanan = dt.id_layanan
