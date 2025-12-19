@@ -77,6 +77,8 @@ class TransaksiController extends Controller {
     public function delete() {
         $id = $_GET['id'] ?? $_GET['id_transaksi'] ?? 0;
         $transaksiModel = $this->model('Transaksi');
+        $layananModel = $this->model('Layanan');
+        $detailModel = $this->model('DetailTransaksi');
 
         if (!$id) {
             $this->redirect('/bellaundry/app/Controllers/TransaksiController.php?aksi=index');
@@ -90,6 +92,17 @@ class TransaksiController extends Controller {
         }
 
         if ($transaksiModel->delete($id)) {
+            $details = $detailModel->getByTransaksi($id);
+            if (!empty($details)) {
+                foreach ($details as $d) {
+                    $id_layanan = $d['id_layanan'] ?? null;
+                    if ($id_layanan) {
+                        $layananModel->delete($id_layanan);
+                    }
+                }
+                $detailModel->deleteByTransaksi($id);
+            }
+
             $this->redirect('/bellaundry/app/Controllers/TransaksiController.php?aksi=index');
         } else {
             $this->redirect('/bellaundry/app/Controllers/TransaksiController.php?aksi=index&error=Gagal+hapus');
