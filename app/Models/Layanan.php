@@ -12,7 +12,7 @@ require_once __DIR__ . '/../../core/Model.php';
                 FROM {$this->table} l
                 LEFT JOIN pelanggan p ON l.id_pelanggan = p.id_pelanggan
                 WHERE l.deleted_at IS NULL
-                ORDER BY l.id_layanan DESC"
+                ORDER BY l.id_layanan ASC"
             );
         }
 
@@ -32,7 +32,7 @@ require_once __DIR__ . '/../../core/Model.php';
             return $qb->raw(
                 "SELECT * FROM {$this->table} 
                 WHERE id_pelanggan = ? AND deleted_at IS NULL
-                ORDER BY id_layanan DESC",
+                ORDER BY id_layanan ASC",
                 [$id_pelanggan]
             );
         }
@@ -42,7 +42,7 @@ require_once __DIR__ . '/../../core/Model.php';
             return $qb->raw(
                 "SELECT * FROM {$this->table} 
                 WHERE id_pelanggan = ? AND deleted_at IS NULL
-                ORDER BY id_layanan DESC
+                ORDER BY id_layanan ASC
                 LIMIT 10",
                 [$id_pelanggan]
             );
@@ -55,7 +55,7 @@ require_once __DIR__ . '/../../core/Model.php';
                 LEFT JOIN detail_transaksi dt ON l.id_layanan = dt.id_layanan
                 LEFT JOIN transaksi t ON dt.id_transaksi = t.id_transaksi
                 WHERE l.id_pelanggan = ? AND DATE(t.tanggal_masuk) = ? AND l.deleted_at IS NULL
-                ORDER BY l.id_layanan DESC",
+                ORDER BY l.id_layanan ASC",
                 [$id_pelanggan, $tanggal]
             );
         }
@@ -67,7 +67,7 @@ require_once __DIR__ . '/../../core/Model.php';
                 LEFT JOIN detail_transaksi dt ON l.id_layanan = dt.id_layanan
                 LEFT JOIN transaksi t ON dt.id_transaksi = t.id_transaksi
                 WHERE l.id_pelanggan = ? AND MONTH(t.tanggal_masuk) = ? AND YEAR(t.tanggal_masuk) = ? AND l.deleted_at IS NULL
-                ORDER BY l.id_layanan DESC",
+                ORDER BY l.id_layanan ASC",
                 [$id_pelanggan, $bulan, $tahun]
             );
         }
@@ -79,7 +79,7 @@ require_once __DIR__ . '/../../core/Model.php';
                 LEFT JOIN detail_transaksi dt ON l.id_layanan = dt.id_layanan
                 LEFT JOIN transaksi t ON dt.id_transaksi = t.id_transaksi
                 WHERE l.id_pelanggan = ? AND YEAR(t.tanggal_masuk) = ? AND l.deleted_at IS NULL
-                ORDER BY l.id_layanan DESC",
+                ORDER BY l.id_layanan ASC",
                 [$id_pelanggan, $tahun]
             );
         }
@@ -127,9 +127,49 @@ require_once __DIR__ . '/../../core/Model.php';
         }
 
         public function purge($id) {
-            $stmt = $this->db->prepare("DELETE FROM detail_transaksi WHERE id_layanan = ?");
-            $stmt->execute([$id]);
-            return $this->deleteRecord($id);
+                $stmt = $this->db->prepare("SELECT DISTINCT id_transaksi FROM detail_transaksi WHERE id_layanan = ?");
+                $stmt->execute([$id]);
+                $transaksiIds = $stmt->fetchAll(PDO::FETCH_COLUMN);
+
+                $stmtDel = $this->db->prepare("DELETE FROM detail_transaksi WHERE id_layanan = ?");
+                $stmtDel->execute([$id]);
+
+                $calcStmt = $this->db->prepare(
+                    "SELECT COALESCE(SUM(
+                        CASE 
+                            WHEN l.nama_layanan = 'Cuci Setrika Reguler' THEN dt.berat * 10000
+                            WHEN l.nama_layanan = 'Cuci Setrika Express' THEN dt.berat * 15000
+                            WHEN l.nama_layanan = 'Cuci Lipat Reguler' THEN dt.berat * 8000
+                            WHEN l.nama_layanan = 'Cuci Lipat Express' THEN dt.berat * 12000
+                            WHEN l.nama_layanan = 'Cuci Saja Reguler' THEN dt.berat * 6000
+                            WHEN l.nama_layanan = 'Cuci Saja Express' THEN dt.berat * 10000
+                            ELSE dt.subtotal
+                        END
+                    ), 0) as total
+                    FROM detail_transaksi dt
+                    LEFT JOIN layanan l ON dt.id_layanan = l.id_layanan
+                    WHERE dt.id_transaksi = ?"
+                );
+
+                $updateStmt = $this->db->prepare("UPDATE transaksi SET total_harga = ? WHERE id_transaksi = ?");
+                $countStmt = $this->db->prepare("SELECT COUNT(*) as cnt FROM detail_transaksi WHERE id_transaksi = ?");
+                $deleteTransaksiStmt = $this->db->prepare("DELETE FROM transaksi WHERE id_transaksi = ?");
+
+                foreach ($transaksiIds as $tid) {
+                    $calcStmt->execute([$tid]);
+                    $res = $calcStmt->fetch(PDO::FETCH_ASSOC);
+                    $total = $res['total'] ?? 0;
+                    $updateStmt->execute([$total, $tid]);
+
+                    $countStmt->execute([$tid]);
+                    $c = $countStmt->fetch(PDO::FETCH_ASSOC);
+                    $cnt = (int)($c['cnt'] ?? 0);
+                    if ($cnt === 0) {
+                        $deleteTransaksiStmt->execute([$tid]);
+                    }
+                }
+
+                return $this->deleteRecord($id);
         }
 
         public function validate($data) {

@@ -7,7 +7,7 @@ class Pelanggan extends Model {
 
     public function getAll() {
         $qb = $this->getQueryBuilder($this->table, $this->primaryKey);
-        return $qb->raw("SELECT * FROM {$this->table} WHERE deleted_at IS NULL ORDER BY id_pelanggan DESC");
+        return $qb->raw("SELECT * FROM {$this->table} WHERE deleted_at IS NULL ORDER BY id_pelanggan ASC");
     }
 
     public function getById($id) {

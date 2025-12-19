@@ -12,7 +12,7 @@ class Transaksi extends Model {
             FROM {$this->table} t
             LEFT JOIN pelanggan p ON t.id_pelanggan = p.id_pelanggan
             WHERE t.deleted_at IS NULL
-            ORDER BY t.tanggal_masuk DESC"
+            ORDER BY t.id_transaksi ASC"
         );
     }
 
@@ -87,7 +87,7 @@ class Transaksi extends Model {
             JOIN detail_transaksi dt ON l.id_layanan = dt.id_layanan
             JOIN transaksi t ON dt.id_transaksi = t.id_transaksi
             JOIN pelanggan p ON l.id_pelanggan = p.id_pelanggan
-            WHERE DATE(t.tanggal_masuk) = ? AND t.deleted_at IS NULL
+            WHERE DATE(t.tanggal_masuk) = ? AND t.deleted_at IS NULL AND l.deleted_at IS NULL
             GROUP BY p.id_pelanggan, p.nama, t.tanggal_masuk
             ORDER BY MAX(l.id_layanan) DESC",
             [$tanggal]
@@ -121,7 +121,7 @@ class Transaksi extends Model {
             JOIN detail_transaksi dt ON l.id_layanan = dt.id_layanan
             JOIN transaksi t ON dt.id_transaksi = t.id_transaksi
             JOIN pelanggan p ON l.id_pelanggan = p.id_pelanggan
-            WHERE MONTH(t.tanggal_masuk) = ? AND YEAR(t.tanggal_masuk) = ? AND t.deleted_at IS NULL
+            WHERE MONTH(t.tanggal_masuk) = ? AND YEAR(t.tanggal_masuk) = ? AND t.deleted_at IS NULL AND l.deleted_at IS NULL
             GROUP BY p.id_pelanggan, p.nama
             ORDER BY MAX(l.id_layanan) DESC",
             [$bulan, $tahun]
@@ -155,7 +155,7 @@ class Transaksi extends Model {
             JOIN detail_transaksi dt ON l.id_layanan = dt.id_layanan
             JOIN transaksi t ON dt.id_transaksi = t.id_transaksi
             JOIN pelanggan p ON l.id_pelanggan = p.id_pelanggan
-            WHERE YEAR(t.tanggal_masuk) = ? AND t.deleted_at IS NULL
+            WHERE YEAR(t.tanggal_masuk) = ? AND t.deleted_at IS NULL AND l.deleted_at IS NULL
             GROUP BY p.id_pelanggan, p.nama
             ORDER BY MAX(l.id_layanan) DESC",
             [$tahun]
@@ -179,7 +179,7 @@ class Transaksi extends Model {
             FROM layanan l
             JOIN detail_transaksi dt ON l.id_layanan = dt.id_layanan
             JOIN transaksi t ON dt.id_transaksi = t.id_transaksi
-            WHERE LOWER(l.status) LIKE '%lunas%' AND YEAR(t.tanggal_masuk) = ? AND t.deleted_at IS NULL",
+            WHERE LOWER(l.status) LIKE '%lunas%' AND YEAR(t.tanggal_masuk) = ? AND t.deleted_at IS NULL AND l.deleted_at IS NULL",
             [$tahun]
         );
         return $rows[0] ?? ['total' => 0];
@@ -205,7 +205,7 @@ class Transaksi extends Model {
             JOIN detail_transaksi dt ON l.id_layanan = dt.id_layanan
             JOIN transaksi t ON dt.id_transaksi = t.id_transaksi
             JOIN pelanggan p ON l.id_pelanggan = p.id_pelanggan
-            WHERE LOWER(l.status) LIKE '%lunas%' AND YEAR(t.tanggal_masuk) = ? AND t.deleted_at IS NULL
+            WHERE LOWER(l.status) LIKE '%lunas%' AND YEAR(t.tanggal_masuk) = ? AND t.deleted_at IS NULL AND l.deleted_at IS NULL
             GROUP BY MONTH(t.tanggal_masuk)
             ORDER BY bulan ASC",
             [$tahun]

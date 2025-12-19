@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Waktu pembuatan: 19 Des 2025 pada 09.05
+-- Waktu pembuatan: 19 Des 2025 pada 11.53
 -- Versi server: 10.4.32-MariaDB
 -- Versi PHP: 8.2.12
 
@@ -35,15 +35,6 @@ CREATE TABLE `detail_transaksi` (
   `subtotal` decimal(10,2) DEFAULT 0.00
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Dumping data untuk tabel `detail_transaksi`
---
-
-INSERT INTO `detail_transaksi` (`id_detail`, `id_transaksi`, `id_layanan`, `berat`, `subtotal`) VALUES
-(16, 17, 27, 4.00, 40000.00),
-(17, 17, 28, 7.00, 105000.00),
-(18, 18, 29, 10.00, 100000.00);
-
 -- --------------------------------------------------------
 
 --
@@ -59,15 +50,6 @@ CREATE TABLE `layanan` (
   `status` varchar(20) DEFAULT 'proses',
   `deleted_at` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data untuk tabel `layanan`
---
-
-INSERT INTO `layanan` (`id_layanan`, `id_pelanggan`, `nama_layanan`, `berat`, `estimasi`, `status`, `deleted_at`) VALUES
-(27, 1, 'Cuci Setrika Reguler', 4, '2 hari', 'Diambil (lunas)', NULL),
-(28, 1, 'Cuci Setrika Express', 7, '6 jam', 'Diambil (lunas)', NULL),
-(29, 1, 'Cuci Setrika Reguler', 10, '2 hari', 'Diambil (lunas)', NULL);
 
 -- --------------------------------------------------------
 
@@ -110,8 +92,7 @@ CREATE TABLE `pelanggan` (
 
 INSERT INTO `pelanggan` (`id_pelanggan`, `nama`, `no_hp`, `alamat`, `deleted_at`) VALUES
 (1, 'Fariz', '082152436040', 'kilo 15', NULL),
-(2, 'Austin', '081254997306', 'Manggaragi', NULL),
-(3, 'tesupdate', '082154073896', 'tesupdate', NULL);
+(2, 'Austin', '081254997306', 'Manggaragi', NULL);
 
 -- --------------------------------------------------------
 
@@ -130,14 +111,6 @@ CREATE TABLE `transaksi` (
   `metode_pembayaran` enum('Cash','Transfer','QRIS') DEFAULT 'Cash',
   `deleted_at` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data untuk tabel `transaksi`
---
-
-INSERT INTO `transaksi` (`id_transaksi`, `id_pelanggan`, `id_pegawai`, `tanggal_masuk`, `tanggal_selesai`, `status`, `total_harga`, `metode_pembayaran`, `deleted_at`) VALUES
-(17, 1, '1', '2025-12-16 12:14:22', '2025-12-19 15:52:18', 'Diambil (lunas)', 145000.00, NULL, NULL),
-(18, 1, '1', '2025-12-19 15:45:52', '2025-12-19 15:51:08', 'Diambil (lunas)', 100000.00, NULL, NULL);
 
 --
 -- Indexes for dumped tables
@@ -185,13 +158,13 @@ ALTER TABLE `transaksi`
 -- AUTO_INCREMENT untuk tabel `detail_transaksi`
 --
 ALTER TABLE `detail_transaksi`
-  MODIFY `id_detail` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
+  MODIFY `id_detail` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
 
 --
 -- AUTO_INCREMENT untuk tabel `layanan`
 --
 ALTER TABLE `layanan`
-  MODIFY `id_layanan` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=30;
+  MODIFY `id_layanan` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=31;
 
 --
 -- AUTO_INCREMENT untuk tabel `pelanggan`
@@ -203,7 +176,7 @@ ALTER TABLE `pelanggan`
 -- AUTO_INCREMENT untuk tabel `transaksi`
 --
 ALTER TABLE `transaksi`
-  MODIFY `id_transaksi` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
+  MODIFY `id_transaksi` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
 
 --
 -- Ketidakleluasaan untuk tabel pelimpahan (Dumped Tables)
