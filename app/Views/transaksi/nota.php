@@ -197,13 +197,37 @@
             </thead>
             <tbody>
                 <?php if (!empty($detail)): 
-                    foreach ($detail as $item): 
-                        $subtotal = ($item['berat'] ?? 0) * ($item['harga'] ?? 0);
+                  foreach ($detail as $item): 
+                    $berat = floatval($item['berat'] ?? 0);
+                    if (isset($item['harga']) && $item['harga'] !== '') {
+                      $harga = floatval($item['harga']);
+                    } else {
+                      $nama = strtolower($item['nama_layanan'] ?? '');
+                      if (strpos($nama, 'cuci setrika reguler') !== false) {
+                        $harga = 10000;
+                      } elseif (strpos($nama, 'cuci setrika express') !== false) {
+                        $harga = 15000;
+                      } elseif (strpos($nama, 'cuci lipat reguler') !== false) {
+                        $harga = 8000;
+                      } elseif (strpos($nama, 'cuci lipat express') !== false) {
+                        $harga = 12000;
+                      } elseif (strpos($nama, 'cuci saja reguler') !== false) {
+                        $harga = 6000;
+                      } elseif (strpos($nama, 'cuci saja express') !== false) {
+                        $harga = 10000;
+                      } else {
+                        $harga = isset($item['subtotal']) && $berat > 0 ? floatval($item['subtotal']) / $berat : 0;
+                      }
+                    }
+                        $subtotal = $berat * $harga;
+                        // simpan kembali ke item agar tampilan dan fallback menggunakan nilai ini
+                        $item['harga'] = $harga;
+                        $item['subtotal'] = $subtotal;
                 ?>
                     <tr>
                         <td><?= htmlspecialchars($item['nama_layanan'] ?? 'Item') ?></td>
                         <td class="right"><?= number_format($item['berat'] ?? 0, 2) ?></td>
-                        <td class="right">Rp <?= number_format($item['harga'] ?? 0, 0) ?></td>
+                        <td class="right">Rp <?= number_format($harga, 0) ?></td>
                         <td class="right">Rp <?= number_format($subtotal, 0) ?></td>
                     </tr>
                 <?php endforeach; 
